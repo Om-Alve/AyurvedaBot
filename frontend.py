@@ -168,21 +168,28 @@ def predict_dosha():
     model = keras.models.load_model('model')
     pred = np.argmax(model.predict(st.session_state.features))
     st.session_state.history.append({"message": dosha_descriptions[pred], "is_user": False})
-    st_message(**st.session_state.history[-1], key=str(len(st.session_state.history)-1))
 
 user_input = st.text_input("Talk to the bot", key="user_input")
 
 if st.button("Submit"):
     generate_answer()
 
-for i, chat in enumerate(st.session_state.history):
-    st_message(**chat, key=str(i))
 
-for i in range(len(st.session_state.history)):
+for i in range(2,len(st.session_state.history)):
     m = st.session_state.history[i]["message"]
     if m.isdigit() and 1 <= int(m) <= 3:
         st.session_state.features.append(int(m) - 1)
-
+    elif st.session_state.history[i]["is_user"]==True:
+        print(mcq_questions[i-3]['options'])
+        st.session_state.features.append(mcq_questions[i-3]['options'].index(m))
+    
+    
+print(st.session_state.features)
 
 if len(st.session_state.features) == 20:
     predict_dosha()
+    
+for i, chat in enumerate(reversed(st.session_state.history)):
+    st_message(**chat, key=str(i))
+
+
